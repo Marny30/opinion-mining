@@ -23,12 +23,12 @@ def formattage(sentence):
     # TODO : virer "!" ?
     # filtre de tous les éléments non alphanumériques
     # On garde l'apostrophe pour les constructions du style "He has/He is => He's" ou pour le possessif
-    res = "".join(
-        [
-        letter for letter in sentence if
-        (letter.isalpha() or letter.isspace() or letter=="'")
-    ]
-    )
+    # res = "".join(
+    #     [
+    #     letter for letter in sentence if
+    #     (letter.isalpha() or letter.isspace() or letter=="'")
+    # ]
+    # )
     return res
 
 def selection(tags):
@@ -59,6 +59,7 @@ def main():
     print(formatted)
 
     tags = extract_tags(formatted)
+    print(tags)
     for tag in tags:
         print(tag)
     select=selection(tags)
