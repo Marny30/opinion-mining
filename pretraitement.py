@@ -40,6 +40,11 @@ def selection(tags):
             res+=[{'pos': tag.pos, 'lemma':tag.lemma}]
     return res
 
+def pretraitement(sentence):
+    formatted = formattage(sentence)
+    tags = extract_tags(formatted)
+    return selection(tags)
+
 def main():
     import sys
     if len(sys.argv) == 1:
