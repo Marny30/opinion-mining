@@ -59,27 +59,32 @@ def Entree():
     while(taille<1 or taille>10000):
         taille=int(input("Entrez le nombre de ligne que vous voulez (1 à 4000) : "))
     with open("./Données/dataset.csv") as csvfile:
-    #Text=csvfile.read().split(' \n')
         for i in range(taille):
             Text+=[csvfile.readline()]
+    return Text
 
-    return "".join(Text)
-    
+def selection_lemma(selected):
+    return " ".join([x['lemma'] for x in selected])
 
 def main():
     import sys, csv
-    if(len(sys.argv)==1):
-        my_sentence = Entree()
-    else:
-        my_sentence = sys.argv[1]
-    print("Input : ")
-    print(my_sentence)
-    formatted = formattage(my_sentence)
-    tags = extract_tags(formatted)
-    select=selection(tags)
-    print("Phrase filtrée et lemmatisée")
-    lemmas = " ".join([x['lemma'] for x in select])
-    print(lemmas)
+    texts = Entree()
+    for text in texts:
+        print(text)
+        print()
+        formatted = formattage(text)
+        tags = extract_tags(formatted)
+        select = selection(tags)
+        lemmas = selection_lemma(select)
+        print(lemmas)
+        print()
+        print()
 
+    # print(tags)
+    # select=selection(tags)
+    # print("Phrase filtrée et lemmatisée")
+    # lemmas = " ".join([x['lemma'] for x in select])
+    # print(lemmas)
+    
 if __name__ == "__main__":
     main()
