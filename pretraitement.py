@@ -44,27 +44,46 @@ def pretraitement(sentence):
     formatted = formattage(sentence)
     tags = extract_tags(formatted)
     return selection(tags)
+def Entree():
+    import csv
+    Text=[]    
+    taille=int(input("Entrez le nombre de ligne que vous voulez (1 à 10000) : "))
+    while(taille<1 or taille>10000):
+        taille=int(input("Entrez le nombre de ligne que vous voulez (1 à 4000) : "))
+    with open("../Données/dataset.csv") as csvfile:
+    #Text=csvfile.read().split(' \n')
+        for i in range(taille):
+            Text+=[csvfile.readline()]
+    for i in range(taille):
+        formatted = formattage(Text[i])
+        print("Phrase formattée :")
+        print(formatted)
+        
+        tags = extract_tags(formatted)
+        print(tags)
+        for tag in tags:
+            print(tag)
+        select=selection(tags)
+        print(select)
 
 def main():
-    import sys
-    if len(sys.argv) == 1:
-        my_sentence = "Might contain spoilers... but believe me!"
+    import sys, csv
+    if(len(sys.argv)==1):
+        Entree()
     else:
         my_sentence = sys.argv[1]
-    print("Input : ")
-    print(my_sentence)
-    formatted = formattage(my_sentence)
-    # formatted = my_sentence
-    print("Phrase formattée :")
-    print(formatted)
-
-    tags = extract_tags(formatted)
-    print(tags)
-    for tag in tags:
-        print(tag)
-    select=selection(tags)
-    print(select)
-
+        print("Input : ")
+        print(my_sentence)
+        formatted = formattage(my_sentence)
+        # formatted = my_sentence
+        print("Phrase formattée :")
+        print(formatted)
+        tags = extract_tags(formatted)
+        print(tags)
+        for tag in tags:
+            print(tag)
+        select=selection(tags)
+        print(select)
 
 if __name__ == "__main__":
     main()
