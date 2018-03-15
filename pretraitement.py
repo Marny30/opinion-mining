@@ -68,6 +68,7 @@ def selection_lemma(selected):
 
 def main():
     import sys, csv
+    fichierSorti = open("datasetlematise.csv", "w")
     texts = Entree()
     for text in texts:
         print(text)
@@ -79,6 +80,11 @@ def main():
         print(lemmas)
         print()
         print()
+        fichierSorti.write(lemmas+"\n")
+
+   
+    
+    fichierSorti.close()
 
     # print(tags)
     # select=selection(tags)
