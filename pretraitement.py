@@ -1,11 +1,17 @@
 #!/usr/bin/python3
 
-
 import treetaggerwrapper
 
-
 def extract_tags(sentence):
-    '''Extraction des tags (Mot, classe grammaticale, lemme) depuis le
+    '''Méthode d'extraction des tags (voir _extract_tags) avec exclusion
+    des éléments n'ayant pas pu être taggués
+    '''
+    tags = _extract_tags(sentence)
+    res = list(filter(lambda x: isinstance(x, treetaggerwrapper.Tag), tags))
+    return res
+
+def _extract_tags(sentence):
+    ''' Méthode interne d'extraction des tags (Mot, classe grammaticale, lemme) depuis le
     treetaggerwrapper
     '''
     import os
@@ -22,16 +28,14 @@ def formattage(sentence):
     res = sentence.lower()
     # Remplacer "." par ". "
     res = res.replace(".", ". ")
-        
-    # TODO : virer "!" ?
-    # filtre de tous les éléments non alphanumériques
     # On garde l'apostrophe pour les constructions du style "He has/He is => He's" ou pour le possessif
-# res = "".join(
-    #     [
-    #     letter for letter in sentence if
-    #     (letter.isalpha() or letter.isspace() or letter=="'")
-    # ]
-    # )
+    ponctuation_to_keep = [',', '.', ';', '"', "'", ' ']
+    res = "".join(
+        [
+        letter for letter in sentence if
+        (letter.isalpha() or letter in ponctuation_to_keep)
+    ]
+    )
     return res
 
 def selection(tags):
@@ -67,6 +71,7 @@ def selection_lemma(selected):
     return " ".join([x['lemma'] for x in selected])
 
 def main():
+    ''' Étape 1 '''
     import sys, csv
     fichierSorti = open("datasetlematise.csv", "w")
     texts = Entree()
@@ -76,16 +81,12 @@ def main():
         formatted = formattage(text)
         tags = extract_tags(formatted)
         select = selection(tags)
-        lemmas = selection_lemma(select)
+        lemmas = selection_lemma(select)  # Texte lemmatisé
         print(lemmas)
         print()
         print()
         fichierSorti.write(lemmas+"\n")
-
-   
-    
     fichierSorti.close()
-
     # print(tags)
     # select=selection(tags)
     # print("Phrase filtrée et lemmatisée")
