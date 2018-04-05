@@ -6,6 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score
 
 
 #ref : http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
@@ -13,7 +14,7 @@ from sklearn.naive_bayes import MultinomialNB
 
 def getDataset(taille):
     Text = []
-    with open("datasetSansPonctuation.csv") as csvfile:
+    with open("lemmatized_dataset_shuffled.csv") as csvfile:
     #Text=csvfile.read().split(' \n')
         for i in range(taille):
             Text+=[csvfile.readline()]
@@ -21,18 +22,26 @@ def getDataset(taille):
 
 def getLabels(taille):
     Poids = []
-    with open("labels.csv") as csvfile:
+    with open("labels_shuffled.csv") as csvfile:
         for i in range(taille):
             Poids+=[csvfile.readline()]
     return Poids
 
 def getPredictions(taille):
     Predictions = []
-    with open("labels.csv") as csvfile:
+    with open("lemmatized_dataset_shuffled.csv") as csvfile:
         for i in range(10000):
             if i >= taille: 
                 Predictions+=[csvfile.readline()]
     return Predictions
+
+def getLabelsVeridique(taille):
+	PoidsVrai = []
+	with open("labels_shuffled.csv") as csvfile:
+		for i in range(10000):
+			if i >= taille:
+				PoidsVrai+=[csvfile.readline()]
+	return PoidsVrai
 
 class ClassifierWrapper:
     """ Classifieur paramétrable selon le type de classifieur souhaité
@@ -61,11 +70,22 @@ def main():
     mb_classifier = ClassifierWrapper(mNB, taille)
     phrasesToTest = getPredictions(taille)
     prediction = mb_classifier.predict(phrasesToTest)
-    
+    labelsVrai = getLabelsVeridique(taille)
     print("Prediction : ")
     for i in range(len(prediction)):
-        print(prediction[i] ,  phrasesToTest[i])
+    	print(prediction[i] ,  phrasesToTest[i])
+    print("Resultats : taux de similarité")
+    similarites = accuracy_score(labelsVrai, prediction)
+    print(similarites)
+
 
 
 if __name__ == '__main__':
     main()
+
+
+# Resultats : taux de similarité textes bruts
+#0.951
+
+#Resultats : taux de similarité textes lemmatisés
+#0.926
