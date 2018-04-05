@@ -16,12 +16,14 @@ def getDataset(path):
 
 class ClassifierTester:
     # variables statiques
-    data = getDataset(SHUFFLED_LEMMA_DATASET_PATH)
+    data = getDataset(SHUFFLED_DATASET_PATH)
+    data_lemma = getDataset(SHUFFLED_LEMMA_DATASET_PATH)
     labels = getLabels(SHUFFLED_LABELS_PATH)
     n = 5000
     data_train = data[:n]       # les n premiers
     labels_train = labels[:n]
     data_test = data[n:]        # les n derniers
+    data_lemma_test = data_lemma[n:]
     labels_test = labels[n:]
     
     def __init__(self, label, classifier):
@@ -32,8 +34,13 @@ class ClassifierTester:
         prediction = self.clfwrapper.predict(ClassifierTester.data_test)
         return accuracy_score(ClassifierTester.labels_test, prediction)
 
+    def getPrecisionLemma(self):
+        prediction = self.clfwrapper.predict(ClassifierTester.data_lemma_test)
+        return accuracy_score(ClassifierTester.labels_test, prediction)
+    
     def __str__(self):
-        return self.label + " : " + str(self.getPrecision())
+        return (
+            "{:20} {:15} {:15}".format(self.label, self.getPrecision(), self.getPrecisionLemma()))
     
 def main():
     labels = [
@@ -47,6 +54,7 @@ def main():
         KNeighborsClassifier(n_neighbors=7)
         ]
     testers = []
+    print("{:20} {:15} {:15}".format("label", "precision_brut", "precision_lemma"))
     for i in range(len(labels)):
         testers.append(ClassifierTester(labels[i], classifiers[i]))
 
