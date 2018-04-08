@@ -1,12 +1,10 @@
 #!/usr/bin/python3
 
 from classifierwrapper import ClassifierWrapper
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score, recall_score, f1_score
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import confusion_matrix
-from sklearn.tree import DecisionTreeClassifier
+import time
 
 SHUFFLED_DATASET_PATH = "./Données/dataset_shuffled.csv"
 SHUFFLED_LABELS_PATH = "./Données/labels_shuffled.csv"
@@ -44,14 +42,17 @@ class ClassifierTester:
         
     def compute_metrics(self):
         for dataset_type in ClassifierTester.data:
+            training_start_time = time.time()
             clfwrapper = ClassifierWrapper(
                 ClassifierTester.data_train[dataset_type],
                 ClassifierTester.labels_train, self.clf)
+            self.clf_metrics[dataset_type]['training_time'] = time.time() - training_start_time
             self._compute_metrics(dataset_type, clfwrapper)
         return self.clf_metrics
 
     def _compute_metrics(self, dataset_type, clfwrapper):
         self.clf_metrics[dataset_type] = {}
+        analysis_start_time = time.time()
         analysis_result = self.clf_metrics[dataset_type]
         prediction =  clfwrapper.predict(ClassifierTester.data_test[dataset_type])
         l_test = ClassifierTester.labels_test
@@ -63,8 +64,11 @@ class ClassifierTester:
         analysis_result['true_positive'] = tp
         analysis_result['false_negative'] = fn
         analysis_result['false_positive'] = fp
-        from sklearn.metrics import classification_report
+        # Temps d'analyse en seconde
+        analysis_result['prediction_time'] = time.time() - analysis_start_time
         
+        
+        # from sklearn.metrics import classification_report
         # print(self.label, "dataset : ", dataset_type)
         # print(classification_report(ClassifierTester.labels_test, prediction))
         
@@ -73,19 +77,25 @@ class ClassifierTester:
     # todo : confusion matrix
     
 def main():
+    from sklearn.neighbors import KNeighborsClassifier
+    from sklearn.naive_bayes import MultinomialNB
+    from sklearn.tree import DecisionTreeClassifier
+    from sklearn import svm
     labels = [
         "K Neighbors n=2",
         "K Neighbors n=4",
         "K Neighbors n=7",
         "Naive Bayes",
-        "Decision Tree"
+        "Decision Tree",
+        "SVM"
     ]
     classifiers = [
         KNeighborsClassifier(n_neighbors=2),
         KNeighborsClassifier(n_neighbors=4),
         KNeighborsClassifier(n_neighbors=7),
         MultinomialNB(),
-        DecisionTreeClassifier()
+        DecisionTreeClassifier(),
+        svm.SVC()
         ]
     testers = []
     for i in range(len(labels)):
