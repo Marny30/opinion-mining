@@ -2,7 +2,11 @@
 
 from classifierwrapper import ClassifierWrapper
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, recall_score, f1_score
+from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import confusion_matrix
+from sklearn.tree import DecisionTreeClassifier
 
 SHUFFLED_DATASET_PATH = "./Données/dataset_shuffled.csv"
 SHUFFLED_LABELS_PATH = "./Données/labels_shuffled.csv"
@@ -16,50 +20,82 @@ def getDataset(path):
 
 class ClassifierTester:
     # variables statiques
-    data = getDataset(SHUFFLED_DATASET_PATH)
-    data_lemma = getDataset(SHUFFLED_LEMMA_DATASET_PATH)
+    data = {}
+    labels = {}
+    data['raw'] = getDataset(SHUFFLED_DATASET_PATH)
+    data['lemma'] = getDataset(SHUFFLED_LEMMA_DATASET_PATH)
     labels = getLabels(SHUFFLED_LABELS_PATH)
     n = 5000
-    data_train = data[:n]       # les n premiers
+    data_train = {}
+    data_train['raw'] = data['raw'][:n] # les n premiers
+    data_train['lemma'] = data['lemma'][:n]
     labels_train = labels[:n]
-    data_test = data[n:]        # les n derniers
-    data_lemma_test = data_lemma[n:]
+    data_test = {}
+    data_test['raw'] = data['raw'][n:]        # les n derniers
+    data_test['lemma'] = data['lemma'][n:]
     labels_test = labels[n:]
     
     def __init__(self, label, classifier):
         self.label = label
-        self.clfwrapper = ClassifierWrapper(ClassifierTester.data_train, ClassifierTester.labels_train, classifier)
+        self.clf_metrics = {}
+        self.clf_metrics['label'] = label
+        self.clf_metrics['lemma'] = {}
+        self.clf = classifier
+        
+    def compute_metrics(self):
+        for dataset_type in ClassifierTester.data:
+            clfwrapper = ClassifierWrapper(
+                ClassifierTester.data_train[dataset_type],
+                ClassifierTester.labels_train, self.clf)
+            self._compute_metrics(dataset_type, clfwrapper)
+        return self.clf_metrics
 
-    def getPrecision(self):
-        prediction = self.clfwrapper.predict(ClassifierTester.data_test)
-        return accuracy_score(ClassifierTester.labels_test, prediction)
+    def _compute_metrics(self, dataset_type, clfwrapper):
+        self.clf_metrics[dataset_type] = {}
+        analysis_result = self.clf_metrics[dataset_type]
+        prediction =  clfwrapper.predict(ClassifierTester.data_test[dataset_type])
+        l_test = ClassifierTester.labels_test
+        analysis_result['accuracy_score'] = accuracy_score(l_test, prediction)
+        analysis_result['recall_score'] = recall_score(l_test, prediction)
+        analysis_result['f1_score'] = f1_score(l_test, prediction)
+        tn, fp, fn, tp = confusion_matrix(l_test, prediction).ravel()
+        analysis_result['true_negative'] = tn
+        analysis_result['true_positive'] = tp
+        analysis_result['false_negative'] = fn
+        analysis_result['false_positive'] = fp
+        from sklearn.metrics import classification_report
+        
+        # print(self.label, "dataset : ", dataset_type)
+        # print(classification_report(ClassifierTester.labels_test, prediction))
+        
+        return analysis_result
 
-    def getPrecisionLemma(self):
-        prediction = self.clfwrapper.predict(ClassifierTester.data_lemma_test)
-        return accuracy_score(ClassifierTester.labels_test, prediction)
-    
-    def __str__(self):
-        return (
-            "{:20} {:15} {:15}".format(self.label, self.getPrecision(), self.getPrecisionLemma()))
+    # todo : confusion matrix
     
 def main():
     labels = [
         "K Neighbors n=2",
         "K Neighbors n=4",
-        "K Neighbors n=7"
+        "K Neighbors n=7",
+        "Naive Bayes",
+        "Decision Tree"
     ]
     classifiers = [
         KNeighborsClassifier(n_neighbors=2),
         KNeighborsClassifier(n_neighbors=4),
-        KNeighborsClassifier(n_neighbors=7)
+        KNeighborsClassifier(n_neighbors=7),
+        MultinomialNB(),
+        DecisionTreeClassifier()
         ]
     testers = []
-    print("{:20} {:15} {:15}".format("label", "precision_brut", "precision_lemma"))
     for i in range(len(labels)):
         testers.append(ClassifierTester(labels[i], classifiers[i]))
 
+    import pprint
+    pp = pprint.PrettyPrinter()
     for tester in testers:
-        print(tester)
+        tester.compute_metrics()
+        pp.pprint(tester.clf_metrics)
         
 if __name__ == '__main__':
     main()
