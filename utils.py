@@ -10,9 +10,14 @@ LABELS_PATH = "./Données/labels.csv"
 SHUFFLED_DATASET_PATH = "./Données/dataset_shuffled.csv"
 SHUFFLED_LABELS_PATH = "./Données/labels_shuffled.csv"
 SHUFFLED_LEMMA_DATASET_PATH = "./Données/lemmatized_dataset_shuffled.csv"
+SHUFFLED_LEMMA_MORPHO_DATASET_PATH = "./Données/lemmatized_morpho_dataset_shuffled.csv"
 
 
 class DataAdaptater():
+    """Classe permettant de transformer des données bruts en données
+    tf-idf pour permettre l'analyse par les classifieurs
+
+    """
     count_vect = CountVectorizer()
     tfidf_transformer = TfidfTransformer()
     def __init__(self):
@@ -44,21 +49,22 @@ LABELS_TEST = LABELS[n:]
 # formattées), d'où le prefixe underscore
 _DATA = {}
 _DATA['raw'] = getDataset(SHUFFLED_DATASET_PATH)
+_DATA['lemma-morpho'] = getDataset(SHUFFLED_LEMMA_MORPHO_DATASET_PATH)
 _DATA['lemma'] = getDataset(SHUFFLED_LEMMA_DATASET_PATH)
 _DATA_TRAIN = {}
-_DATA_TRAIN['raw'] = _DATA['raw'][:n] # les n premiers
-_DATA_TRAIN['lemma'] = _DATA['lemma'][:n]
 _DATA_TEST = {}
-_DATA_TEST['raw'] = _DATA['raw'][n:]        # les n derniers
-_DATA_TEST['lemma'] = _DATA['lemma'][n:]
-
+for key in _DATA_TRAIN:
+    _DATA_TRAIN[key] = _DATA[key][:n] # les n premiers
+    _DATA_TEST[key] = _DATA[key][n:]  # les n derniers
 
 FORMATTED_DATA = {}
 FORMATTED_DATA_TRAIN = {}
 FORMATTED_DATA_TEST = {}
 _da  = DataAdaptater()
-for key in _DATA_TRAIN:
-    FORMATTED_DATA[key] = _da.adapt(_DATA[key])
-    FORMATTED_DATA_TRAIN[key] = FORMATTED_DATA[key][:n]
-    FORMATTED_DATA_TEST[key] = FORMATTED_DATA[key][n:]
-    
+
+def format_data():
+    for key in _DATA:
+        FORMATTED_DATA[key] = _da.adapt(_DATA[key])
+        FORMATTED_DATA_TRAIN[key] = FORMATTED_DATA[key][:n]
+        FORMATTED_DATA_TEST[key] = FORMATTED_DATA[key][n:]
+format_data()

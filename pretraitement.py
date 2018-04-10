@@ -54,12 +54,16 @@ def pos_selection(tags):
 def selection_lemma(selected):
     return " ".join([x['lemma'] for x in selected])
 
-def pretraitement(sentence, lemmatize=True):
+def pretraitement(sentence, lemmatize=True, selection=True):
     formatted = formattage(sentence)
     tags = extract_tags(formatted)
-    selection = pos_selection(tags)
+    if selection:
+        tags = pos_selection(tags)
+    else:
+        return " ".join([x.lemma for x in tags])
+    
     if lemmatize:
-        return selection_lemma(selection)
+        return selection_lemma(tags)
     else:
         return selection
 
@@ -78,14 +82,13 @@ def Entree():
 def main():
     ''' Étape 1 '''
     import sys
-    out_path = "./Données/lemmatized_dataset.csv"
-    in_path = "./Données/dataset.csv"
+    out_path = "./Données/lemmatized_dataset_shuffled.csv"
+    in_path = "./Données/dataset_shuffled.csv"
     data = [line.strip('\n') for line in open(in_path)]
     chunksize = 10
     indice = 0
 
     # obtention du nb de lignes déjà prétraitées ##############################
-
     try: indice = len([line.strip('\n') for line in open(out_path, "r")])
     except: indice= 0
     
@@ -107,7 +110,7 @@ def main():
         newdata = []
         next_i = min(indice + chunksize, len(data))
         for i in range(indice, next_i):
-            newdata += [pretraitement(data[i], lemmatize=True)]
+            newdata += [pretraitement(data[i], lemmatize=True, selection=False)]
             indice += 1
         print(indice, "/", len(data), file=sys.stderr)
 
