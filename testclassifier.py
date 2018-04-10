@@ -61,24 +61,28 @@ def main():
     from sklearn.tree import DecisionTreeClassifier
     from sklearn import svm
     labels = [
-        "K Neighbors n=2",
-        "K Neighbors n=4",
-        "K Neighbors n=7",
-        "Naive Bayes",
-        "Decision Tree",
+        # "K Neighbors n=1",
+        # "K Neighbors n=5",
+        # "K Neighbors n=10",
+        # "Naive Bayes",
+        # "Decision Tree",
         "SVM"
     ]
+
     classifiers = [
-        KNeighborsClassifier(n_neighbors=2),
-        KNeighborsClassifier(n_neighbors=4),
-        KNeighborsClassifier(n_neighbors=7),
-        MultinomialNB(),
-        DecisionTreeClassifier(),
-        svm.SVC()
-        ]
+        ["K Neighbors n=1", KNeighborsClassifier(n_neighbors=1)],
+        ["K Neighbors n=5", KNeighborsClassifier(n_neighbors=5)],
+        ["K Neighbors n=10", KNeighborsClassifier(n_neighbors=10)],
+        ["Naive Bayes", MultinomialNB()],
+        ["Decision Tree", DecisionTreeClassifier()],
+        ["SVM linéaire", svm.SVC(kernel='linear')],
+        # C : régularisation
+        ["SVM polynominal degré 3, C=1.0", svm.SVC(kernel='poly', degree=3)]
+    ]
+    
     testers = []
-    for i in range(len(labels)):
-        testers.append(ClassifierTester(labels[i], classifiers[i]))
+    for couple_label_clf in classifiers:
+        testers.append(ClassifierTester(couple_label_clf[0], couple_label_clf[1]))
 
     import pprint
     pp = pprint.PrettyPrinter()
