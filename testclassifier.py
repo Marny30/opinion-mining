@@ -6,56 +6,34 @@ from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import confusion_matrix
 import time
 
-SHUFFLED_DATASET_PATH = "./Données/dataset_shuffled.csv"
-SHUFFLED_LABELS_PATH = "./Données/labels_shuffled.csv"
-SHUFFLED_LEMMA_DATASET_PATH = "./Données/lemmatized_dataset_shuffled.csv"
-
-def getLabels(path):
-    return [int(line.strip('\n')) for line in open(path)]
-
-def getDataset(path):
-    return [line.strip('\n') for line in open(path)]
+import utils
 
 class ClassifierTester:
-    # variables statiques
-    data = {}
-    labels = {}
-    data['raw'] = getDataset(SHUFFLED_DATASET_PATH)
-    data['lemma'] = getDataset(SHUFFLED_LEMMA_DATASET_PATH)
-    labels = getLabels(SHUFFLED_LABELS_PATH)
-    n = 5000
-    data_train = {}
-    data_train['raw'] = data['raw'][:n] # les n premiers
-    data_train['lemma'] = data['lemma'][:n]
-    labels_train = labels[:n]
-    data_test = {}
-    data_test['raw'] = data['raw'][n:]        # les n derniers
-    data_test['lemma'] = data['lemma'][n:]
-    labels_test = labels[n:]
-    
     def __init__(self, label, classifier):
         self.label = label
         self.clf_metrics = {}
         self.clf_metrics['label'] = label
-        self.clf_metrics['lemma'] = {}
+        for dataset_type in utils.FORMATTED_DATA:
+            # raw, lemma, without stopwords, ....
+            self.clf_metrics[dataset_type] = {}
         self.clf = classifier
         
     def compute_metrics(self):
-        for dataset_type in ClassifierTester.data:
+        for dataset_type in utils.FORMATTED_DATA:
             training_start_time = time.time()
             clfwrapper = ClassifierWrapper(
-                ClassifierTester.data_train[dataset_type],
-                ClassifierTester.labels_train, self.clf)
+                utils.FORMATTED_DATA_TRAIN[dataset_type],
+                utils.LABELS_TRAIN, self.clf)
             self.clf_metrics[dataset_type]['training_time'] = time.time() - training_start_time
             self._compute_metrics(dataset_type, clfwrapper)
         return self.clf_metrics
 
     def _compute_metrics(self, dataset_type, clfwrapper):
-        self.clf_metrics[dataset_type] = {}
         analysis_start_time = time.time()
         analysis_result = self.clf_metrics[dataset_type]
-        prediction =  clfwrapper.predict(ClassifierTester.data_test[dataset_type])
-        l_test = ClassifierTester.labels_test
+        prediction =  clfwrapper.predict(
+            utils.FORMATTED_DATA_TEST[dataset_type])
+        l_test = utils.LABELS_TEST
         analysis_result['accuracy_score'] = accuracy_score(l_test, prediction)
         analysis_result['recall_score'] = recall_score(l_test, prediction)
         analysis_result['f1_score'] = f1_score(l_test, prediction)
