@@ -2,7 +2,7 @@
 
 from classifierwrapper import ClassifierWrapper
 from sklearn.metrics import accuracy_score, recall_score, f1_score
-from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import precision_score
 from sklearn.metrics import confusion_matrix
 import time
 
@@ -36,6 +36,7 @@ class ClassifierTester:
         l_test = utils.LABELS_TEST
         analysis_result['accuracy_score'] = accuracy_score(l_test, prediction)
         analysis_result['recall_score'] = recall_score(l_test, prediction)
+        analysis_result['precision_score'] = precision_score(l_test, prediction)
         analysis_result['f1_score'] = f1_score(l_test, prediction)
         tn, fp, fn, tp = confusion_matrix(l_test, prediction).ravel()
         analysis_result['true_negative'] = tn
