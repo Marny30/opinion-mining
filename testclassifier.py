@@ -53,7 +53,16 @@ class ClassifierTester:
         
         return analysis_result
 
-    # todo : confusion matrix
+    # TODO
+    # def get_comment_giving_wrong_predictions(self, dataset_type):
+    #     res = []
+    #     t_labels = utils.LABELS_TEST
+    #     data = utils.FORMATTED_DATA_TEST[dataset_type]
+    #     prediction = self.clf.predict(data)
+        
+    #     for i in range(len(t_labels)):
+    #         if utils.LABELS_TEST[i] != prediction[i]:
+    #             res += data[i]
     
 def main():
     from sklearn.neighbors import KNeighborsClassifier
@@ -76,8 +85,10 @@ def main():
         ["Naive Bayes", MultinomialNB()],
         ["Decision Tree", DecisionTreeClassifier()],
         ["SVM linéaire", svm.SVC(kernel='linear')],
-        # C : régularisation
-        ["SVM polynominal degré 3, C=1.0", svm.SVC(kernel='poly', degree=3)]
+        ["SVM polynominal degré 3", svm.SVC(kernel='poly', degree=3)],
+        ["SVM rbf, gamma=0.7", svm.SVC(kernel='rbf', gamma=0.7)],
+        ["SVM rbf, gamma=0.9", svm.SVC(kernel='rbf', gamma=0.9)],
+        ["SVM rbf, gamma=1/5000", svm.SVC(kernel='rbf')]
     ]
     
     testers = []
