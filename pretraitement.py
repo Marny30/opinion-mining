@@ -3,10 +3,12 @@
 import treetaggerwrapper
 
 import os
+from nltk.corpus import stopwords
 _ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 _TREETAGGER_DIR = _ROOT_DIR+"/dep/treetagger"
 _TAGGER = treetaggerwrapper.TreeTagger(TAGLANG='en',
                                        TAGDIR=_TREETAGGER_DIR)
+_STOPWORDS = set(stopwords.words('english'))
 
 def extract_tags(sentence):
     '''Méthode d'extraction des tags (voir _extract_tags) avec exclusion
@@ -50,13 +52,22 @@ def pos_selection(tags):
             res += [{'pos': tag.pos, 'lemma':tag.lemma}]
     return res
 
+def remove_stopwords(tags):
+    res = []
+    for tag in tags:
+        if not tag.word in _STOPWORDS:
+            res += [tag]
+    return res
 
 def selection_lemma(selected):
     return " ".join([x['lemma'] for x in selected])
 
-def pretraitement(sentence, lemmatize=True, selection=True):
+def pretraitement(sentence, filterstopwords=False, lemmatize=True, selection=True):
     formatted = formattage(sentence)
     tags = extract_tags(formatted)
+
+    if filterstopwords:
+        tags = remove_stopwords(tags)
     if selection:
         tags = pos_selection(tags)
     else:
@@ -82,7 +93,7 @@ def Entree():
 def main():
     ''' Étape 1 '''
     import sys
-    out_path = "./Données/lemmatized_dataset_shuffled.csv"
+    out_path = "./Données/dataset_without_stopwords_shuffled.csv"
     in_path = "./Données/dataset_shuffled.csv"
     data = [line.strip('\n') for line in open(in_path)]
     chunksize = 10
@@ -110,7 +121,8 @@ def main():
         newdata = []
         next_i = min(indice + chunksize, len(data))
         for i in range(indice, next_i):
-            newdata += [pretraitement(data[i], lemmatize=True, selection=False)]
+            # newdata += [pretraitement(data[i], lemmatize=True, selection=False)]
+            newdata += [pretraitement(data[i], filterstopwords=True, lemmatize=False, selection=False)]
             indice += 1
         print(indice, "/", len(data), file=sys.stderr)
 

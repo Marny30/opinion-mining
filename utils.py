@@ -11,6 +11,7 @@ SHUFFLED_DATASET_PATH = "./Données/dataset_shuffled.csv"
 SHUFFLED_LABELS_PATH = "./Données/labels_shuffled.csv"
 SHUFFLED_LEMMA_DATASET_PATH = "./Données/lemmatized_dataset_shuffled.csv"
 SHUFFLED_LEMMA_MORPHO_DATASET_PATH = "./Données/lemmatized_morpho_dataset_shuffled.csv"
+SHUFFLED_WITHOUT_STOPWORDS_DATASET_PATH = "./Données/dataset_without_stopwords_shuffled.csv"
 
 
 class DataAdaptater():
@@ -49,8 +50,10 @@ LABELS_TEST = LABELS[n:]
 # formattées), d'où le prefixe underscore
 _DATA = {}
 _DATA['raw'] = getDataset(SHUFFLED_DATASET_PATH)
+_DATA['without-stopwords'] = getDataset(SHUFFLED_WITHOUT_STOPWORDS_DATASET_PATH)
 _DATA['lemma-morpho'] = getDataset(SHUFFLED_LEMMA_MORPHO_DATASET_PATH)
 _DATA['lemma'] = getDataset(SHUFFLED_LEMMA_DATASET_PATH)
+
 _DATA_TRAIN = {}
 _DATA_TEST = {}
 for key in _DATA_TRAIN:
