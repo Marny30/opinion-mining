@@ -70,14 +70,15 @@ class ClassifierTester:
     #                 raise ValueError('Formattage utils.LABELS_TEST[i]')
 
         # on ne retient que les n premiers avis
-        res['false_negative'] = res['false_negative'][:n]
-        res['false_positive'] = res['false_positive'][:n]
-        return res
+        # res['false_negative'] = res['false_negative'][:n]
+        # res['false_positive'] = res['false_positive'][:n]
+        # return res
 
 def main():
     from sklearn.neighbors import KNeighborsClassifier
     from sklearn.naive_bayes import MultinomialNB
     from sklearn.tree import DecisionTreeClassifier
+    from sklearn.linear_model import SGDClassifier
     from sklearn import svm
     
     # TODO : jouer variation C
@@ -91,7 +92,8 @@ def main():
         ["SVM polynominal degré 3", svm.SVC(kernel='poly', degree=3)],
         ["SVM rbf, gamma=0.7", svm.SVC(kernel='rbf', gamma=0.7)],
         ["SVM rbf, gamma=0.9", svm.SVC(kernel='rbf', gamma=0.9)],
-        ["SVM rbf, gamma=1/5000", svm.SVC(kernel='rbf')]
+        ["SVM rbf, gamma=1/5000", svm.SVC(kernel='rbf')],
+        ["SGDClassifier", SGDClassifier()]
     ]
     
     testers = []
