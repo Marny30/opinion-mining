@@ -9,7 +9,7 @@ def save_in_file(path, labels):
 def main():
     import utils
     import classifierwrapper
-    utils.prediction_config("./Données/test_data.csv")
+    utils.prediction_config()
 
     output_path_prefix = "./Données/test_labels-trained-with-"
     output_path_suffix = ".csv"
