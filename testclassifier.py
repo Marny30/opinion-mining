@@ -5,8 +5,14 @@ from sklearn.metrics import accuracy_score, recall_score, f1_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import confusion_matrix
 import time
-
+from sklearn.model_selection import cross_val_score
+from sklearn import svm
 import utils
+import scikitplot as skplt
+import matplotlib.pyplot as plt
+from sklearn import metrics
+import numpy as np
+
 
 class ClassifierTester:
     def __init__(self, label, classifier):
@@ -17,6 +23,7 @@ class ClassifierTester:
             # raw, lemma, without stopwords, ....
             self.clf_metrics[dataset_type] = {}
         self.clfwrapper =  ClassifierWrapper(classifier)
+        self.classifier = classifier
         
     def compute_metrics(self):
         for dataset_type in utils._DATA:
@@ -32,6 +39,9 @@ class ClassifierTester:
         prediction =  clfwrapper.predict(
             utils.FORMATTED_DATA_TEST[dataset_type])
         l_test = utils.LABELS_TEST
+        cross_validation = cross_val_score(self.classifier, utils.FORMATTED_DATA_TRAIN[dataset_type], utils.LABELS_TRAIN, cv=10)
+        analysis_result['cross_validation'] = cross_validation.mean()
+        analysis_result['marge_cross_validation (+/-)'] = cross_validation.std() * 2
         analysis_result['accuracy_score'] = accuracy_score(l_test, prediction)
         analysis_result['recall_score'] = recall_score(l_test, prediction)
         analysis_result['precision_score'] = precision_score(l_test, prediction)
@@ -43,7 +53,38 @@ class ClassifierTester:
         analysis_result['false_positive'] = fp
         # Temps d'analyse en seconde
         analysis_result['prediction_time'] = time.time() - analysis_start_time
-        
+
+
+        ###### CODE D'AFFICHAGE DE ROC CURVE ##########
+        probs = self.classifier.predict_proba(utils.FORMATTED_DATA_TEST[dataset_type])
+        preds = probs[:,1]
+        fpr, tpr, threshold = metrics.roc_curve(utils.LABELS_TEST, preds)
+        roc_auc = metrics.auc(fpr, tpr)
+        plt.title('ROC CURVE - ' + self.label)
+        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc)
+        plt.legend(loc = 'lower right')
+        plt.plot([0, 1], [0, 1],'r--')
+        plt.xlim([0, 1])
+        plt.ylim([0, 1])
+        plt.ylabel('True Positive Rate')
+        plt.xlabel('False Positive Rate')
+        plt.show()
+        ################################################
+
+        #y_true = np.asarray(utils.LABELS_TEST)
+        #y_probas = np.asarray(prediction)
+        #fpr, tpr, thresholds = metrics.roc_curve(y_true, y_probas, pos_label=5)
+
+        # Print ROC curve
+        #plt.plot(fpr,tpr)
+        #plt.show() 
+
+        # Print AUC
+        #auc = np.trapz(tpr,fpr)
+        #print('AUC:', auc)
+
+
+
         # from sklearn.metrics import classification_report
         # print(self.label, "dataset : ", dataset_type)
         # print(classification_report(ClassifierTester.labels_test, prediction))        
@@ -79,11 +120,11 @@ def main():
     from sklearn.naive_bayes import MultinomialNB
     from sklearn.tree import DecisionTreeClassifier
     from sklearn.linear_model import SGDClassifier
-    from sklearn import svm
+    
     
     # TODO : jouer variation C
     classifiers = [
-        ["K Neighbors n=1", KNeighborsClassifier(n_neighbors=1)],
+        ["K Neighbors n=1", KNeighborsClassifier(n_neighbors=1)],#
         ["K Neighbors n=5", KNeighborsClassifier(n_neighbors=5)],
         ["K Neighbors n=10", KNeighborsClassifier(n_neighbors=10)],
         ["Naive Bayes", MultinomialNB()],
@@ -115,9 +156,11 @@ def main():
             # pp.pprint(res)
             # print(res)
             # print()
+   
     for tester in testers:
         tester.compute_metrics()    
         pp.pprint(tester.clf_metrics)
+
 
 if __name__ == '__main__':
     main()
