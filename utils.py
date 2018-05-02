@@ -63,18 +63,23 @@ def define_test_labels(labels):
     global LABELS_TEST
     LABELS_TEST = labels
 
-def prediction_config(test_dataset_path):
+def prediction_config():
     """Définie la configuration pour la prédiction, où les labels
     résultants sont inconnus. Le dataset d'entrainement n'est ici pas
     le même que le dataset de test.
     """
     define_train_labels(LABELS)
-    text_test = getDataset(test_dataset_path)
+    
+    path_test = {}
+    path_test['raw'] = "./Données/test_data.csv"
+    path_test['without-stopwords'] = "./Données/test_data_without_stopwords.csv"
+    path_test['lemma'] = "./Données/test_data_lemmatized.csv"
+    path_test['lemma-morpho'] = "./Données/test_data_lemmamorpho.csv"
     for key in _DATA:
         text_train = _DATA[key]
         define_train_data(text_train, key)
         # Jeu de donné inchangé, pour chaque entraînement distinct
-        define_test_data(text_test, key)
+        define_test_data(getDataset(path_test[key]), key)
         
 def default_config(partie_entrainement=0.66):
     """Définie la configuration par défaut pour les sous-programmes. La
